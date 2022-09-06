@@ -17,9 +17,9 @@ describe('UsersController', () => {
     usersController = users.get<UsersController>(UsersController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(usersController.getHello()).toBe('Hello Users!');
+  describe('root /users', () => {
+    it('should return "Hello Users!"', () => {
+      expect(usersController.getUsers()).toBe('Hello Users!');
     });
   });
 });
