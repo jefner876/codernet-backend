@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { User } from './users.schema';
 import { UsersService } from './users.service';
 
 
@@ -7,7 +8,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getUsers(): string {
+  getUsers():Promise<User[]>{
     return this.usersService.getUsers();
   }
+
 }
