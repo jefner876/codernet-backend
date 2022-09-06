@@ -20,9 +20,7 @@ export class RoomGeneralGateway implements OnGatewayDisconnect {
     this.server.emit('users-changed', {user: nickname, event: 'joined room: General'}); 
   }
   @SubscribeMessage('room-general-message')
-  handleMessage(client: Socket , {data}) {
-    console.log("test");
-    
+  handleMessage(client: Socket , {data}) {    
     this.server.emit("room-general-message", {text: data, from: this.nicknames[client.id], created: new Date() })
   }
 }
