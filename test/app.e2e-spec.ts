@@ -22,6 +22,19 @@ describe('AppController (e2e)', () => {
       .expect('Hello World!');
   });
 
+  describe('/*', () => {
+    describe('ALL', () => {
+      test('status 404: uncreated route returns Not found message', () => {
+        return request(app.getHttpServer())
+          .get('/notaroute')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toHaveProperty('error', 'Not Found');
+          });
+      });
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });

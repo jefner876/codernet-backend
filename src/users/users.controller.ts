@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Catch,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
+import { MongooseError } from 'mongoose';
 import { CreateUserDto } from './create-user.dto';
 import { User } from './users.schema';
 import { UsersService } from './users.service';
@@ -14,6 +24,11 @@ export class UsersController {
 
   @Post()
   createNewUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+    if (!createUserDto.email || !createUserDto.username) {
+      throw new BadRequestException('Missing required data');
+    }
     return this.usersService.create(createUserDto);
   }
+
+  // @Catch(MongooseError)
 }

@@ -23,7 +23,7 @@ describe('Users (e2e)', () => {
   });
 
   describe('POST', () => {
-    it('201 status', () => {
+    test('201 status', () => {
       const testCreateAccount = {
         username: 'new user',
         email: '1234@gmail.com',
@@ -37,6 +37,31 @@ describe('Users (e2e)', () => {
           expect(body).toHaveProperty('username', 'new user');
           expect(body).toHaveProperty('email', '1234@gmail.com');
           expect(body).toHaveProperty('_id', expect.any(String));
+        });
+    });
+    test('200 status: data type converted', () => {
+      const testCreateAccount = {
+        username: 10,
+        email: '1234@gmail.com',
+      };
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .send(testCreateAccount)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body).toHaveProperty('username', expect.any(String));
+        });
+    });
+    test('400 status: malformed body rejection', () => {
+      const testCreateAccount = {
+        username: 'testuser',
+      };
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .send(testCreateAccount)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.message).toBe('Missing required data');
         });
     });
   });
