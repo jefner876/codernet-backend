@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +15,11 @@ describe('Users (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
+
+  afterAll(async () => {
+    await (app.get(getConnectionToken()) as Connection).db.dropDatabase();
+    await app.close();
   });
 
   describe('POST', () => {
@@ -47,9 +54,5 @@ describe('Users (e2e)', () => {
           });
         });
     });
-  });
-
-  afterAll(async () => {
-    await app.close();
   });
 });
