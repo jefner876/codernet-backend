@@ -1,16 +1,18 @@
 import {
   BadRequestException,
   Body,
-  Catch,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
   Post,
 } from '@nestjs/common';
-import { MongooseError } from 'mongoose';
-import { CreateUserDto } from './create-user.dto';
-import { User } from './users.schema';
+import mongoose from 'mongoose';
+import { whitelistValidation } from '../validator';
+
+import { CreateUserDto, UpdateUserDto } from './create-user.dto';
+
 import { UsersService } from './users.service';
 
 @Controller('/api/users')
@@ -18,17 +20,36 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getUsers(): Promise<User[]> {
-    return this.usersService.getUsers();
+  async getUsers() {
+    const users = await this.usersService.getUsers();
+    return { users };
   }
 
   @Post()
-  createNewUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  async createNewUser(@Body(whitelistValidation) createUserDto: CreateUserDto) {
     if (!createUserDto.email || !createUserDto.username) {
       throw new BadRequestException('Missing required data');
     }
-    return this.usersService.create(createUserDto);
+    const newUser = await this.usersService.create(createUserDto);
+    return { newUser };
   }
 
-  // @Catch(MongooseError)
+  @Patch(':id')
+  async updateUserProfile(
+    @Param() { id },
+    @Body(whitelistValidation)
+    updateUserDto: UpdateUserDto,
+  ) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid User ID');
+    }
+    const updatedUser = await this.usersService.updateUserProfile(
+      id,
+      updateUserDto,
+    );
+    if (!updatedUser) {
+      throw new NotFoundException('User ID not found');
+    }
+    return { updatedUser };
+  }
 }
