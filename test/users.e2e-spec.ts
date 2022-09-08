@@ -32,8 +32,6 @@ describe('Users (e2e)', () => {
     await app.close();
   });
 
-  let postId = '';
-
   describe('POST', () => {
     test('201 status - create new user', () => {
       const testCreateAccount = {
@@ -55,7 +53,6 @@ describe('Users (e2e)', () => {
           expect(newUser).toHaveProperty('avatar', expect.any(String));
           expect(newUser).toHaveProperty('bio', expect.any(String));
           expect(newUser).toHaveProperty('dateOfBirth', expect.any(String));
-          postId = newUser._id;
         });
     });
     test('201 status: data type converted', () => {
@@ -100,6 +97,10 @@ describe('Users (e2e)', () => {
   });
   describe('PATCH', () => {
     test('200 status - update user profile fields', () => {
+      const userToPatchTo = {
+        username: 'user to patch to',
+        email: 'usertopatchto@gmail.com',
+      };
       const profileUpdates = {
         username: 'updated username',
         email: 'updatedemail@gmail.com',
@@ -108,52 +109,112 @@ describe('Users (e2e)', () => {
         bio: 'new bio information',
       };
       return request(app.getHttpServer())
-        .patch(`/api/users/${postId}`)
-        .send(profileUpdates)
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).toBeInstanceOf(Object);
-          expect(body).toHaveProperty('updatedUser');
-          const { updatedUser } = body;
-          expect(updatedUser).toHaveProperty('username', 'updated username');
-          expect(updatedUser).toHaveProperty('email', 'updatedemail@gmail.com');
-          expect(updatedUser).toHaveProperty('_id', postId);
-          expect(updatedUser).toHaveProperty('location', 'new location');
-          expect(updatedUser).toHaveProperty(
-            'avatar',
-            'https://cdn-icons-png.flaticon.com/512/40/40058.png',
-          );
-          expect(updatedUser).toHaveProperty('bio', 'new bio information');
-          expect(updatedUser).toHaveProperty('dateOfBirth', expect.any(String));
-        });
+        .post('/api/users')
+        .send(userToPatchTo)
+        .expect(201)
+        .then(
+          ({
+            body: {
+              newUser: { _id: id },
+            },
+          }) => {
+            return request(app.getHttpServer())
+              .patch(`/api/users/${id}`)
+              .send(profileUpdates)
+              .expect(200)
+              .then(({ body }) => {
+                expect(body).toBeInstanceOf(Object);
+                expect(body).toHaveProperty('updatedUser');
+                const { updatedUser } = body;
+                expect(updatedUser).toHaveProperty(
+                  'username',
+                  'updated username',
+                );
+                expect(updatedUser).toHaveProperty(
+                  'email',
+                  'updatedemail@gmail.com',
+                );
+                expect(updatedUser).toHaveProperty('_id', id);
+                expect(updatedUser).toHaveProperty('location', 'new location');
+                expect(updatedUser).toHaveProperty(
+                  'avatar',
+                  'https://cdn-icons-png.flaticon.com/512/40/40058.png',
+                );
+                expect(updatedUser).toHaveProperty(
+                  'bio',
+                  'new bio information',
+                );
+                expect(updatedUser).toHaveProperty(
+                  'dateOfBirth',
+                  expect.any(String),
+                );
+              });
+          },
+        );
     });
+
     test('200 status: data type converted', () => {
-      const testCreateAccount = {
+      const userToPatchTo = {
+        username: 'user to patch to',
+        email: 'usertopatchto@gmail.com',
+      };
+      const profileUpdates = {
         username: 10,
         email: '1234@gmail.com',
       };
       return request(app.getHttpServer())
-        .patch(`/api/users/${postId}`)
-        .send(testCreateAccount)
-        .expect(200)
-        .then(({ body: { updatedUser } }) => {
-          expect(updatedUser).toHaveProperty('username', expect.any(String));
-        });
+        .post('/api/users')
+        .send(userToPatchTo)
+        .expect(201)
+        .then(
+          ({
+            body: {
+              newUser: { _id: id },
+            },
+          }) => {
+            return request(app.getHttpServer())
+              .patch(`/api/users/${id}`)
+              .send(profileUpdates)
+              .expect(200)
+              .then(({ body: { updatedUser } }) => {
+                expect(updatedUser).toHaveProperty(
+                  'username',
+                  expect.any(String),
+                );
+              });
+          },
+        );
     });
     test('400 status: malformed body', () => {
+      const userToPatchTo = {
+        username: 'user to patch to',
+        email: 'usertopatchto@gmail.com',
+      };
       const bodyWithWrongField = {
         notafield: 'testuser',
         alsonotafield: 'testuser',
       };
       return request(app.getHttpServer())
-        .patch(`/api/users/${postId}`)
-        .send(bodyWithWrongField)
-        .expect(400)
-        .then(({ body: { message } }) => {
-          expect(message).toBe(
-            'property notafield should not exist and property alsonotafield should not exist',
-          );
-        });
+        .post('/api/users')
+        .send(userToPatchTo)
+        .expect(201)
+        .then(
+          ({
+            body: {
+              newUser: { _id: id },
+            },
+          }) => {
+            return request(app.getHttpServer())
+              .patch(`/api/users/${id}`)
+              .send(bodyWithWrongField)
+              .expect(400)
+              .then(({ body: { message } }) => {
+                expect(message).toBe(
+                  'property notafield should not exist and property alsonotafield should not exist',
+                );
+              });
+          },
+        );
     });
     test('400 status - id not valid', () => {
       const profileUpdates = {
@@ -209,6 +270,61 @@ describe('Users (e2e)', () => {
             expect(user).toHaveProperty('bio', expect.any(String));
             expect(user).toHaveProperty('dateOfBirth', expect.any(String));
           });
+        });
+    });
+  });
+
+  describe('GET by Id', () => {
+    test('200 status', () => {
+      const testCreateAccount = {
+        username: 'testusergetbyid',
+        email: 'testusergetbyid@gmail.com',
+      };
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .send(testCreateAccount)
+        .expect(201)
+        .then(
+          ({
+            body: {
+              newUser: { _id: id },
+            },
+          }) => {
+            return request(app.getHttpServer())
+              .get(`/api/users/${id}`)
+              .expect(200)
+              .then(({ body }) => {
+                expect(body).toBeInstanceOf(Object);
+                expect(body).toHaveProperty('user');
+                const { user } = body;
+                expect(user).toHaveProperty('username', 'testusergetbyid');
+                expect(user).toHaveProperty(
+                  'email',
+                  'testusergetbyid@gmail.com',
+                );
+                expect(user).toHaveProperty('_id', id);
+                expect(user).toHaveProperty('location', expect.any(String));
+                expect(user).toHaveProperty('avatar', expect.any(String));
+                expect(user).toHaveProperty('bio', expect.any(String));
+                expect(user).toHaveProperty('dateOfBirth', expect.any(String));
+              });
+          },
+        );
+    });
+    test('400 status - id not valid', () => {
+      return request(app.getHttpServer())
+        .get(`/api/users/notanid`)
+        .expect(400)
+        .then(({ body: { message } }) => {
+          expect(message).toBe('Invalid User ID');
+        });
+    });
+    test('404 status - id not found', () => {
+      return request(app.getHttpServer())
+        .get(`/api/users/6319c57ae80c5cc2c300318b`) //valid id format, not in collection
+        .expect(404)
+        .then(({ body: { message } }) => {
+          expect(message).toBe('User ID not found');
         });
     });
   });

@@ -24,6 +24,17 @@ export class UsersController {
     const users = await this.usersService.getUsers();
     return { users };
   }
+  @Get(':id')
+  async getUserById(@Param() { id }) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid User ID');
+    }
+    const user = await this.usersService.getUserById(id);
+    if (!user) {
+      throw new NotFoundException('User ID not found');
+    }
+    return { user };
+  }
 
   @Post()
   async createNewUser(@Body(whitelistValidation) createUserDto: CreateUserDto) {
