@@ -326,4 +326,49 @@ describe('Users (e2e)', () => {
         });
     });
   });
+  describe('GET by Email', () => {
+    test('200 status', () => {
+      const testCreateAccount = {
+        username: 'testusergetbyid',
+        email: 'testusergetbyid@gmail.com',
+      };
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .send(testCreateAccount)
+        .expect(201)
+        .then(() => {
+          return request(app.getHttpServer())
+            .get(`/api/users/login/testusergetbyid@gmail.com`)
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).toBeInstanceOf(Object);
+              expect(body).toHaveProperty('user');
+              const { user } = body;
+              expect(user).toHaveProperty('username', 'testusergetbyid');
+              expect(user).toHaveProperty('email', 'testusergetbyid@gmail.com');
+              expect(user).toHaveProperty('_id', expect.any(String));
+              expect(user).toHaveProperty('location', expect.any(String));
+              expect(user).toHaveProperty('avatar', expect.any(String));
+              expect(user).toHaveProperty('bio', expect.any(String));
+              expect(user).toHaveProperty('DOB', expect.any(String));
+            });
+        });
+    });
+    test('400 status - email not valid', () => {
+      return request(app.getHttpServer())
+        .get(`/api/users/login/notanid`)
+        .expect(400)
+        .then(({ body: { message } }) => {
+          expect(message).toBe('Invalid User Email');
+        });
+    });
+    test('404 status - id not found', () => {
+      return request(app.getHttpServer())
+        .get(`/api/users/login/nonindatabase@gmail.com`) //valid email format, not in collection
+        .expect(404)
+        .then(({ body: { message } }) => {
+          expect(message).toBe('User email not found');
+        });
+    });
+  });
 });
