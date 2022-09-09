@@ -23,7 +23,7 @@ export class User {
   bio: string;
 
   @Prop({ default: '404' })
-  dateOfBirth: string;
+  DOB: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

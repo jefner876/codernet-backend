@@ -52,7 +52,7 @@ describe('Users (e2e)', () => {
           expect(newUser).toHaveProperty('location', expect.any(String));
           expect(newUser).toHaveProperty('avatar', expect.any(String));
           expect(newUser).toHaveProperty('bio', expect.any(String));
-          expect(newUser).toHaveProperty('dateOfBirth', expect.any(String));
+          expect(newUser).toHaveProperty('DOB', expect.any(String));
         });
     });
     test('201 status: data type converted', () => {
@@ -107,6 +107,7 @@ describe('Users (e2e)', () => {
         location: 'new location',
         avatar: 'https://cdn-icons-png.flaticon.com/512/40/40058.png',
         bio: 'new bio information',
+        DOB: '22/05/1965',
       };
       return request(app.getHttpServer())
         .post('/api/users')
@@ -144,10 +145,7 @@ describe('Users (e2e)', () => {
                   'bio',
                   'new bio information',
                 );
-                expect(updatedUser).toHaveProperty(
-                  'dateOfBirth',
-                  expect.any(String),
-                );
+                expect(updatedUser).toHaveProperty('DOB', '22/05/1965');
               });
           },
         );
@@ -268,7 +266,7 @@ describe('Users (e2e)', () => {
             expect(user).toHaveProperty('location', expect.any(String));
             expect(user).toHaveProperty('avatar', expect.any(String));
             expect(user).toHaveProperty('bio', expect.any(String));
-            expect(user).toHaveProperty('dateOfBirth', expect.any(String));
+            expect(user).toHaveProperty('DOB', expect.any(String));
           });
         });
     });
@@ -306,7 +304,7 @@ describe('Users (e2e)', () => {
                 expect(user).toHaveProperty('location', expect.any(String));
                 expect(user).toHaveProperty('avatar', expect.any(String));
                 expect(user).toHaveProperty('bio', expect.any(String));
-                expect(user).toHaveProperty('dateOfBirth', expect.any(String));
+                expect(user).toHaveProperty('DOB', expect.any(String));
               });
           },
         );
