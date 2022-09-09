@@ -5,12 +5,13 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { whitelistValidation } from '../validator';
 
-import { CreateBoardDto } from './create-board.dto';
+import { CreateBoardDto, JoinBoardDto } from './create-board.dto';
 
 import { BoardsService } from './boards.service';
 
@@ -39,10 +40,17 @@ export class BoardsController {
   async createNewBoard(
     @Body(whitelistValidation) createBoardDto: CreateBoardDto,
   ) {
-    if (!createBoardDto.boardname) {
+    if (!createBoardDto.topic || !createBoardDto.subject) {
       throw new BadRequestException('Missing required data');
     }
     const newBoard = await this.boardsService.create(createBoardDto);
     return { newBoard };
+  }
+
+  @Patch()
+  async joinBoard(@Body() joinBoardDto: JoinBoardDto) {
+    const updatedBoard = await this.boardsService.joinBoard(joinBoardDto);
+
+    return { updatedBoard };
   }
 }

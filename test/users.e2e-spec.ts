@@ -77,7 +77,9 @@ describe('Users (e2e)', () => {
         .send(testCreateAccount)
         .expect(400)
         .then(({ body: { message } }) => {
-          expect(message).toBe('Bad Request');
+          expect(message).toBe(
+            'email must be an email and email should not be empty',
+          );
         });
     });
     test('400 status: malformed body', () => {

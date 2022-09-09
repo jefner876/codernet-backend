@@ -34,30 +34,41 @@ describe('Boards (e2e)', () => {
 
   describe('POST', () => {
     test('201 status - create new board', () => {
-      const testCreateAccount = {
-        boardname: 'new board',
+      const createTestBoard = {
+        topic: 'test topic',
+        subject: 'test subject',
+        icon: 'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
       };
       return request(app.getHttpServer())
         .post('/api/boards')
-        .send(testCreateAccount)
+        .send(createTestBoard)
         .expect(201)
         .then(({ body }) => {
           expect(body).toBeInstanceOf(Object);
           expect(body).toHaveProperty('newBoard');
           const { newBoard } = body;
-          expect(newBoard).toHaveProperty('boardname', 'new board');
           expect(newBoard).toHaveProperty('_id', expect.any(String));
+          expect(newBoard).toHaveProperty('topic', 'test topic');
+          expect(newBoard).toHaveProperty('subject', 'test subject');
+          expect(newBoard).toHaveProperty('postCount', 0);
+          expect(newBoard).toHaveProperty('subscriberCount', 0);
+          expect(newBoard).toHaveProperty(
+            'icon',
+            'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
+          );
         });
     });
 
     test('400 status: malformed body', () => {
-      const bodyWithWrongField = {
-        boardname: 'new board',
+      const createTestBoardWithWrongField = {
+        topic: 'test topic',
+        subject: 'test subject',
+        icon: 'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
         notboardname: 'new board',
       };
       return request(app.getHttpServer())
         .post(`/api/boards`)
-        .send(bodyWithWrongField)
+        .send(createTestBoardWithWrongField)
         .expect(400)
         .then(({ body: { message } }) => {
           expect(message).toBe('property notboardname should not exist');
@@ -78,7 +89,12 @@ describe('Boards (e2e)', () => {
           expect(boards.length).toBeGreaterThan(0);
 
           boards.forEach((board) => {
-            expect(board).toHaveProperty('boardname', expect.any(String));
+            expect(board).toHaveProperty('topic', expect.any(String));
+            expect(board).toHaveProperty('subject', expect.any(String));
+            expect(board).toHaveProperty('_id', expect.any(String));
+            expect(board).toHaveProperty('subject', 'test subject');
+            expect(board).toHaveProperty('postCount', 0);
+            expect(board).toHaveProperty('subscriberCount', 0);
           });
         });
     });
@@ -86,12 +102,14 @@ describe('Boards (e2e)', () => {
 
   describe('GET by Id', () => {
     test('200 status', () => {
-      const testCreateAccount = {
-        boardname: 'testboardgetbyid',
+      const createTestBoard = {
+        topic: 'testboardgetbyid',
+        subject: 'test subject',
+        icon: 'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
       };
       return request(app.getHttpServer())
         .post('/api/boards')
-        .send(testCreateAccount)
+        .send(createTestBoard)
         .expect(201)
         .then(
           ({
@@ -106,8 +124,15 @@ describe('Boards (e2e)', () => {
                 expect(body).toBeInstanceOf(Object);
                 expect(body).toHaveProperty('board');
                 const { board } = body;
-                expect(board).toHaveProperty('boardname', 'testboardgetbyid');
+                expect(board).toHaveProperty('topic', 'testboardgetbyid');
+                expect(board).toHaveProperty('subject', 'test subject');
                 expect(board).toHaveProperty('_id', id);
+                expect(board).toHaveProperty('postCount', 0);
+                expect(board).toHaveProperty('subscriberCount', 0);
+                expect(board).toHaveProperty(
+                  'icon',
+                  'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
+                );
               });
           },
         );
@@ -127,6 +152,73 @@ describe('Boards (e2e)', () => {
         .then(({ body: { message } }) => {
           expect(message).toBe('Board ID not found');
         });
+    });
+  });
+
+  describe('PATCH', () => {
+    test('200 status', () => {
+      const createTestBoard = {
+        topic: 'testboardgetbyid',
+        subject: 'test subject',
+        icon: 'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
+      };
+      return request(app.getHttpServer())
+        .post('/api/boards')
+        .send(createTestBoard)
+        .expect(201)
+        .then(
+          ({
+            body: {
+              newBoard: { _id: boardId },
+            },
+          }) => {
+            const testCreateAccount = {
+              username: 'new user',
+              email: '1234@gmail.com',
+            };
+            return request(app.getHttpServer())
+              .post('/api/users')
+              .send(testCreateAccount)
+              .expect(201)
+              .then(
+                ({
+                  body: {
+                    newUser: { _id: userId },
+                  },
+                }) => {
+                  return request(app.getHttpServer())
+                    .patch(`/api/boards`)
+                    .send({ userId, boardId })
+                    .expect(200)
+                    .then(({ body }) => {
+                      expect(body).toBeInstanceOf(Object);
+                      expect(body).toHaveProperty('updatedBoard');
+                      const { updatedBoard } = body;
+                      expect(updatedBoard).toHaveProperty(
+                        'topic',
+                        'testboardgetbyid',
+                      );
+                      expect(updatedBoard).toHaveProperty(
+                        'subject',
+                        'test subject',
+                      );
+                      expect(updatedBoard).toHaveProperty('_id', boardId);
+                      expect(updatedBoard).toHaveProperty('postCount', 0);
+                      expect(updatedBoard).toHaveProperty('subscriberCount', 1);
+                      expect(updatedBoard).toHaveProperty(
+                        'icon',
+                        'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
+                      );
+                      expect(updatedBoard).toHaveProperty('subscribers');
+                      const { subscribers } = updatedBoard;
+                      expect(subscribers).toBeInstanceOf(Array);
+                      expect(subscribers.length).toBe(1);
+                      expect(subscribers[0]).toBe(userId);
+                    });
+                },
+              );
+          },
+        );
     });
   });
 });
