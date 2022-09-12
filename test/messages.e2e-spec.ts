@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { getConnectionToken } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 
 describe('Messages (e2e)', () => {
   let app: INestApplication;
@@ -47,6 +45,7 @@ describe('Messages (e2e)', () => {
       const testMessages = {
         body: 'Hello!',
         userId: userId,
+        room: 'Python',
       };
       return request(app.getHttpServer())
         .post('/api/messages')
@@ -66,6 +65,7 @@ describe('Messages (e2e)', () => {
       const bodyWithWrongField = {
         body: 'Hello!',
         userId: userId,
+        room: 'Python',
         notafield: 'Zoink!',
       };
       return request(app.getHttpServer())
@@ -80,6 +80,7 @@ describe('Messages (e2e)', () => {
       const invalidUserId = {
         body: 'Hello!',
         userId: 'notAnId',
+        room: 'Python',
       };
       return request(app.getHttpServer())
         .post('/api/messages')
@@ -108,6 +109,59 @@ describe('Messages (e2e)', () => {
             expect(message).toHaveProperty('userId', userId);
             expect(message).toHaveProperty('created_at', expect.any(String));
           });
+        });
+    });
+  });
+
+  describe('GET (by category)', () => {
+    test('200 ', () => {
+      const testMessagePython = {
+        body: 'Hello Python!',
+        userId: userId,
+        room: 'Python',
+      };
+      const testMessageJavascript = {
+        body: 'Hello JS!',
+        userId: userId,
+        room: 'Javascript',
+      };
+      return request(app.getHttpServer())
+        .post('/api/messages')
+        .send(testMessagePython)
+        .expect(201)
+        .then(() => {
+          return request(app.getHttpServer())
+            .post('/api/messages')
+            .send(testMessageJavascript)
+            .expect(201)
+            .then(() => {
+              return request(app.getHttpServer())
+                .get('/api/messages/Python')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body).toBeInstanceOf(Object);
+                  expect(body).toHaveProperty('messages');
+                  const { messages } = body;
+                  expect(messages).toBeInstanceOf(Array);
+                  expect(messages.length).toBeGreaterThan(0);
+                  messages.forEach((message) => {
+                    expect(message).toHaveProperty('room', 'Python');
+                  });
+                  return request(app.getHttpServer())
+                    .get('/api/messages/Javascript')
+                    .expect(200)
+                    .then(({ body }) => {
+                      expect(body).toBeInstanceOf(Object);
+                      expect(body).toHaveProperty('messages');
+                      const { messages } = body;
+                      expect(messages).toBeInstanceOf(Array);
+                      expect(messages.length).toBeGreaterThan(0);
+                      messages.forEach((message) => {
+                        expect(message).toHaveProperty('room', 'Javascript');
+                      });
+                    });
+                });
+            });
         });
     });
   });

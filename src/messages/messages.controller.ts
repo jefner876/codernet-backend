@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   Post,
 } from '@nestjs/common';
@@ -22,10 +21,10 @@ export class MessagesController {
     return { messages };
   }
 
-  @Get(':id')
-  async getMessagesById(@Param() { id }) {
-    const message = await this.messagesService.getMessageById(id);
-    return { message };
+  @Get(':room')
+  async getMessagesByRoom(@Param() { room }) {
+    const messages = await this.messagesService.getMessagesByRoom(room);
+    return { messages };
   }
 
   @Post()

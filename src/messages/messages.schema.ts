@@ -3,7 +3,7 @@ import { Document, now } from 'mongoose';
 
 export type MessageDocument = Message & Document;
 
-@Schema({ timestamps: true, collection: 'messages' })
+@Schema()
 export class Message {
   @Prop({ required: true })
   userId: string;
@@ -13,6 +13,9 @@ export class Message {
 
   @Prop({ default: now() })
   created_at: Date;
+
+  @Prop({ required: true })
+  room: string;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

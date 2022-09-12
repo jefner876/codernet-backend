@@ -6,4 +6,7 @@ export class CreateMessageDto {
 
   @IsNotEmpty()
   body: string;
+
+  @IsNotEmpty()
+  room: string;
 }

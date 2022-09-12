@@ -19,7 +19,7 @@ export class MessagesService {
     return this.messageModel.find().exec();
   }
 
-  async getMessageById(id: string): Promise<Message> {
-    return this.messageModel.findById(id).exec();
+  async getMessagesByRoom(room: string): Promise<Message[]> {
+    return this.messageModel.find({ room: room }).exec();
   }
 }

@@ -34,11 +34,15 @@ export class MessagesGateway implements NestGateway {
   }
   @SubscribeMessage('chatMessage')
   async handleMessage(
-    @MessageBody() { chatMessage, username, room, userId },
+    @MessageBody() { chatMessage, room, userId },
     @ConnectedSocket() socket: Socket,
   ) {
     socket.to(room).emit('message:received', chatMessage);
-    this.messagesService.create({ body: chatMessage.text, userId: userId });
+    this.messagesService.create({
+      body: chatMessage.text,
+      userId: userId,
+      room,
+    });
   }
 
   handleDisconnect(socket: Socket) {
