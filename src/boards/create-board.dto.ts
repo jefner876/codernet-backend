@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsUrl } from 'class-validator';
+import { ObjectId } from 'mongoose';
 export class CreateBoardDto {
   @IsNotEmpty()
   topic: string;
@@ -14,13 +15,13 @@ export class CreateBoardDto {
 
   subscriberCount: number;
 
-  subscribers: [];
+  subscribers: [ObjectId];
 }
 
 export class JoinBoardDto {
   @IsNotEmpty()
-  userId: string;
+  userId: ObjectId;
 
   @IsNotEmpty()
-  boardId: string;
+  boardId: ObjectId;
 }

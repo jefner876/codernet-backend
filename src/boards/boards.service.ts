@@ -25,8 +25,8 @@ export class BoardsService {
     const updated = await this.boardModel.findByIdAndUpdate(
       { _id: joinBoardDto.boardId },
       {
-        $set: {
-          subscribers: [joinBoardDto.userId],
+        $push: {
+          subscribers: joinBoardDto.userId,
         },
         $inc: { subscriberCount: 1 },
       },

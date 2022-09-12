@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 
 export type BoardDocument = Board & Document;
 
@@ -21,7 +21,7 @@ export class Board {
   subscriberCount: number;
 
   @Prop({ default: [] })
-  subscribers: [];
+  subscribers: [ObjectId];
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);

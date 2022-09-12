@@ -21,17 +21,6 @@ describe('Boards (e2e)', () => {
     await app.close();
   });
 
-  afterAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-    await (app.get(getConnectionToken()) as Connection).db.dropDatabase();
-    await app.close();
-  });
-
   describe('POST', () => {
     test('201 status - create new board', () => {
       const createTestBoard = {
@@ -214,6 +203,67 @@ describe('Boards (e2e)', () => {
                       expect(subscribers).toBeInstanceOf(Array);
                       expect(subscribers.length).toBe(1);
                       expect(subscribers[0]).toBe(userId);
+                      const testCreateAccount = {
+                        username: 'new user',
+                        email: '1234@gmail.com',
+                      };
+                      const testCreateAccount2 = {
+                        username: 'new user2',
+                        email: '2234@gmail.com',
+                      };
+                      return request(app.getHttpServer())
+                        .post('/api/users')
+                        .send(testCreateAccount2)
+                        .expect(201)
+                        .then(
+                          ({
+                            body: {
+                              newUser: { _id: userId2 },
+                            },
+                          }) => {
+                            return request(app.getHttpServer())
+                              .patch(`/api/boards`)
+                              .send({ userId: userId2, boardId })
+                              .expect(200)
+                              .then(({ body }) => {
+                                expect(body).toBeInstanceOf(Object);
+                                expect(body).toHaveProperty('updatedBoard');
+                                const { updatedBoard } = body;
+
+                                expect(updatedBoard).toHaveProperty(
+                                  'topic',
+                                  'testboardgetbyid',
+                                );
+                                expect(updatedBoard).toHaveProperty(
+                                  'subject',
+                                  'test subject',
+                                );
+                                expect(updatedBoard).toHaveProperty(
+                                  '_id',
+                                  boardId,
+                                );
+                                expect(updatedBoard).toHaveProperty(
+                                  'postCount',
+                                  0,
+                                );
+                                expect(updatedBoard).toHaveProperty(
+                                  'subscriberCount',
+                                  2,
+                                );
+                                expect(updatedBoard).toHaveProperty(
+                                  'icon',
+                                  'https://cdn-icons-png.flaticon.com/512/1216/1216895.png',
+                                );
+                                expect(updatedBoard).toHaveProperty(
+                                  'subscribers',
+                                );
+                                const { subscribers } = updatedBoard;
+                                expect(subscribers).toBeInstanceOf(Array);
+                                expect(subscribers.length).toBe(2);
+                                expect(subscribers[1]).toBe(userId2);
+                              });
+                          },
+                        );
                     });
                 },
               );

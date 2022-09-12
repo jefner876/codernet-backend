@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { User, UserDocument } from './users.schema';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 
@@ -24,7 +24,7 @@ export class UsersService {
   }
 
   async updateUserProfile(
-    id: string,
+    id: ObjectId,
     updateUserDto: UpdateUserDto,
   ): Promise<User> {
     const updatedUser = await this.userModel.findByIdAndUpdate(
