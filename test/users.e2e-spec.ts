@@ -21,17 +21,6 @@ describe('Users (e2e)', () => {
     await app.close();
   });
 
-  afterAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-    await (app.get(getConnectionToken()) as Connection).db.dropDatabase();
-    await app.close();
-  });
-
   describe('POST', () => {
     test('201 status - create new user', () => {
       const testCreateAccount = {
@@ -77,7 +66,9 @@ describe('Users (e2e)', () => {
         .send(testCreateAccount)
         .expect(400)
         .then(({ body: { message } }) => {
-          expect(message).toBe('Bad Request');
+          expect(message).toBe(
+            'email must be an email and email should not be empty',
+          );
         });
     });
     test('400 status: malformed body', () => {

@@ -5,12 +5,17 @@ import { RoomGeneralGateway } from './gateways/room-general.gateway';
 import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as dotenv from 'dotenv';
+import { BoardsModule } from './boards/boards.module';
 
 const ENV = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `${__dirname}/../.env.${ENV}` });
 
 @Module({
-  imports: [MongooseModule.forRoot(process.env.DATABASE_URL), UsersModule],
+  imports: [
+    MongooseModule.forRoot(process.env.DATABASE_URL),
+    UsersModule,
+    BoardsModule,
+  ],
   controllers: [AppController],
   providers: [AppService, RoomGeneralGateway],
 })
