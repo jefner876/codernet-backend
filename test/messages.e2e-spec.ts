@@ -97,7 +97,6 @@ describe('Messages (e2e)', () => {
         .get('/api/messages')
         .expect(200)
         .then(({ body }) => {
-          console.log(body);
           expect(body).toBeInstanceOf(Object);
           expect(body).toHaveProperty('messages');
           const { messages } = body;
