@@ -1,4 +1,6 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
@@ -8,33 +10,41 @@ import { Socket } from 'socket.io';
 
 @WebSocketGateway()
 export class RoomGeneralGateway implements OnGatewayDisconnect {
-  nicknames: Map<string, string> = new Map();
+  users = new Map();
 
   @WebSocketServer()
   server;
 
-  handleDisconnect(client: Socket) {
-    this.server.emit('users-changed', {
-      user: this.nicknames[client.id],
-      event: 'left',
-    });
-    this.nicknames.delete(client.id);
+  @SubscribeMessage('joinRoom')
+  handleJoin(
+    @MessageBody() { username, room, userId },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const user = { socketId: socket.id, username, room };
+    this.users[userId] = user;
+
+    socket.join(user.room);
+
+    this.server.emit('welcomeMessage', 'Welcome to this chat-room');
+    socket.broadcast
+      .to(user.room)
+      .emit('userJoin', `${user.username} has joined the ${user.room} chat`);
+  }
+  @SubscribeMessage('chatMessage')
+  handleMessage(
+    @MessageBody() { chatMessage, username, room, userId },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    socket.to(room).emit('message:received', chatMessage);
   }
 
-  @SubscribeMessage('set-nickname')
-  setNickname(client: Socket, nickname: string) {
-    this.nicknames[client.id] = nickname;
-    this.server.emit('users-changed', {
-      user: nickname,
-      event: 'joined room: General',
+  handleDisconnect(socket: Socket) {
+    this.server.emit('userLeave', {
+      user: this.users[socket.id],
+      event: 'left',
     });
-  }
-  @SubscribeMessage('room-general-message')
-  handleMessage(client: Socket, { data }) {
-    this.server.emit('room-general-message', {
-      text: data,
-      from: this.nicknames[client.id],
-      created: new Date(),
-    });
+    console.log(socket.id);
+    this.users.delete(socket.id);
+    console.log({ after: this.users });
   }
 }
