@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RoomGeneralGateway } from './gateways/room-general.gateway';
 import { UsersModule } from './users/users.module';
+import { MessagesModule } from './messages/messages.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as dotenv from 'dotenv';
 import { BoardsModule } from './boards/boards.module';
@@ -15,6 +16,7 @@ dotenv.config({ path: `${__dirname}/../.env.${ENV}` });
     MongooseModule.forRoot(process.env.DATABASE_URL),
     UsersModule,
     BoardsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoomGeneralGateway],
