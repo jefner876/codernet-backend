@@ -1,22 +1,24 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { NestGateway } from '@nestjs/websockets/interfaces/nest-gateway.interface';
 import { Socket } from 'socket.io';
+import { MessagesService } from './messages.service';
 
 @WebSocketGateway()
-export class RoomGeneralGateway implements OnGatewayDisconnect {
+export class MessagesGateway implements NestGateway {
+  constructor(private readonly messagesService: MessagesService) {}
   users = new Map();
 
   @WebSocketServer()
   server;
 
   @SubscribeMessage('joinRoom')
-  handleJoin(
+  async handleJoin(
     @MessageBody() { username, room, userId },
     @ConnectedSocket() socket: Socket,
   ) {
@@ -31,11 +33,12 @@ export class RoomGeneralGateway implements OnGatewayDisconnect {
       .emit('userJoin', `${user.username} has joined the ${user.room} chat`);
   }
   @SubscribeMessage('chatMessage')
-  handleMessage(
+  async handleMessage(
     @MessageBody() { chatMessage, username, room, userId },
     @ConnectedSocket() socket: Socket,
   ) {
     socket.to(room).emit('message:received', chatMessage);
+    this.messagesService.create({ body: chatMessage.text, userId: userId });
   }
 
   handleDisconnect(socket: Socket) {
@@ -43,8 +46,7 @@ export class RoomGeneralGateway implements OnGatewayDisconnect {
       user: this.users[socket.id],
       event: 'left',
     });
-    console.log(socket.id);
+
     this.users.delete(socket.id);
-    console.log({ after: this.users });
   }
 }
