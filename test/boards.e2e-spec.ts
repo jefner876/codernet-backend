@@ -7,7 +7,7 @@ import { Connection } from 'mongoose';
 
 describe('Boards (e2e)', () => {
   let app: INestApplication;
-jest.setTimeout(35000)
+  jest.setTimeout(35000);
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
