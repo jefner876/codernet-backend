@@ -2,12 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { getConnectionToken } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 
 describe('Boards (e2e)', () => {
   let app: INestApplication;
-jest.setTimeout(35000)
+  jest.setTimeout(35000);
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -83,7 +81,7 @@ jest.setTimeout(35000)
             expect(board).toHaveProperty('_id', expect.any(String));
             expect(board).toHaveProperty('subject', 'test subject');
             expect(board).toHaveProperty('postCount', 0);
-            expect(board).toHaveProperty('subscriberCount', 0);
+            expect(board).toHaveProperty('subscriberCount', expect.any(Number));
           });
         });
     });
@@ -203,10 +201,7 @@ jest.setTimeout(35000)
                       expect(subscribers).toBeInstanceOf(Array);
                       expect(subscribers.length).toBe(1);
                       expect(subscribers[0]).toBe(userId);
-                      const testCreateAccount = {
-                        username: 'new user',
-                        email: '1234@gmail.com',
-                      };
+
                       const testCreateAccount2 = {
                         username: 'new user2',
                         email: '2234@gmail.com',

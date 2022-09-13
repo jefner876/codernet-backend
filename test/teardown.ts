@@ -4,8 +4,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'mongoose';
 import { AppModule } from '../src/app.module';
 
+let app: INestApplication;
 const teardown = async () => {
-  let app: INestApplication;
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RoomGeneralGateway } from './gateways/room-general.gateway';
 import { UsersModule } from './users/users.module';
 import { MessagesModule } from './messages/messages.module';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -19,6 +18,6 @@ dotenv.config({ path: `${__dirname}/../.env.${ENV}` });
     MessagesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RoomGeneralGateway],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsUrl, IsOptional } from 'class-validator';
-import { ObjectId } from 'mongoose';
+
 export class CreateUserDto {
   @IsNotEmpty()
   username: string;

@@ -2,12 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { getConnectionToken } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
-jest.setTimeout(35000)
+  jest.setTimeout(35000);
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
