@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateMessageDto {
   @IsNotEmpty()
-  userId: string;
+  user: string;
 
   @IsNotEmpty()
   body: string;

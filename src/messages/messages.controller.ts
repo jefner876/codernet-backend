@@ -31,7 +31,7 @@ export class MessagesController {
   async createNewMessage(
     @Body(whitelistValidation) createMessageDto: CreateMessageDto,
   ) {
-    if (!mongoose.Types.ObjectId.isValid(createMessageDto.userId)) {
+    if (!mongoose.Types.ObjectId.isValid(createMessageDto.user)) {
       throw new BadRequestException('Invalid User ID');
     }
     const newMessage = await this.messagesService.create(createMessageDto);

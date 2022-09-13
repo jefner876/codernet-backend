@@ -44,7 +44,7 @@ describe('Messages (e2e)', () => {
     test('201 status', () => {
       const testMessages = {
         body: 'Hello!',
-        userId: userId,
+        user: userId,
         room: 'Python',
       };
       return request(app.getHttpServer())
@@ -56,15 +56,15 @@ describe('Messages (e2e)', () => {
           expect(body).toHaveProperty('newMessage');
           const { newMessage } = body;
           expect(newMessage).toHaveProperty('body', 'Hello!');
-          expect(newMessage).toHaveProperty('userId', userId);
           expect(newMessage).toHaveProperty('_id', expect.any(String));
           expect(newMessage).toHaveProperty('created_at', expect.any(String));
+          expect(newMessage).toHaveProperty('user', userId);
         });
     });
     test('400 status: malformed body', () => {
       const bodyWithWrongField = {
         body: 'Hello!',
-        userId: userId,
+        user: userId,
         room: 'Python',
         notafield: 'Zoink!',
       };
@@ -79,7 +79,7 @@ describe('Messages (e2e)', () => {
     test('400 status - id not valid', () => {
       const invalidUserId = {
         body: 'Hello!',
-        userId: 'notAnId',
+        user: 'notAnId',
         room: 'Python',
       };
       return request(app.getHttpServer())
@@ -106,8 +106,13 @@ describe('Messages (e2e)', () => {
 
           messages.forEach((message) => {
             expect(message).toHaveProperty('body', expect.any(String));
-            expect(message).toHaveProperty('userId', userId);
             expect(message).toHaveProperty('created_at', expect.any(String));
+            expect(message).toHaveProperty('user');
+            const { user } = message;
+            expect(user).toHaveProperty('_id', userId);
+            expect(user).toHaveProperty('avatar');
+            expect(user).toHaveProperty('username', 'new user');
+            expect(user).toHaveProperty('email', '1234@gmail.com');
           });
         });
     });
@@ -117,12 +122,12 @@ describe('Messages (e2e)', () => {
     test('200 ', () => {
       const testMessagePython = {
         body: 'Hello Python!',
-        userId: userId,
+        user: userId,
         room: 'Python',
       };
       const testMessageJavascript = {
         body: 'Hello JS!',
-        userId: userId,
+        user: userId,
         room: 'Javascript',
       };
       return request(app.getHttpServer())
@@ -146,6 +151,12 @@ describe('Messages (e2e)', () => {
                   expect(messages.length).toBeGreaterThan(0);
                   messages.forEach((message) => {
                     expect(message).toHaveProperty('room', 'Python');
+                    expect(message).toHaveProperty('user');
+                    const { user } = message;
+                    expect(user).toHaveProperty('_id', userId);
+                    expect(user).toHaveProperty('avatar');
+                    expect(user).toHaveProperty('username', 'new user');
+                    expect(user).toHaveProperty('email', '1234@gmail.com');
                   });
                   return request(app.getHttpServer())
                     .get('/api/messages/Javascript')

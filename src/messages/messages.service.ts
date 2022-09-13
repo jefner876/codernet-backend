@@ -16,10 +16,10 @@ export class MessagesService {
   }
 
   async getMessages(): Promise<Message[]> {
-    return this.messageModel.find().exec();
+    return this.messageModel.find().populate('user').exec();
   }
 
   async getMessagesByRoom(room: string): Promise<Message[]> {
-    return this.messageModel.find({ room: room }).exec();
+    return this.messageModel.find({ room: room }).populate('user').exec();
   }
 }

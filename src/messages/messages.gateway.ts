@@ -40,7 +40,7 @@ export class MessagesGateway implements NestGateway {
     socket.to(room).emit('message:received', chatMessage);
     this.messagesService.create({
       body: chatMessage.text,
-      userId: userId,
+      user: userId,
       room,
     });
   }
